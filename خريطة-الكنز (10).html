@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>خريطة الكنز - نيومي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07050f;--card:#100d1e;--card2:#161228;
+  --border:rgba(255,255,255,0.07);
+  --gold:#f5c842;--gold2:#e8a020;--gold3:#fff4c2;
+  --p:#9b5de5;--p2:#f15bb5;--p3:#00bbf9;
+  --text:#f5eedd;--muted:#7a6a55;
+  --map-bg:#1a1208;--map-border:#3d2e10;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;overflow-x:hidden;}
+body{
+  font-family:'Tajawal',sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 10%,rgba(155,93,229,0.1) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 35% at 85% 85%,rgba(245,200,66,0.08) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+.wrap{position:relative;z-index:1;max-width:420px;margin:0 auto;padding:18px 14px 60px;}
+.screen{display:none;}
+.screen.active{display:block;animation:fadeUp .5s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ======= LOGIN ======= */
+.login-top{text-align:center;padding:44px 0 24px;}
+.map-orb{
+  width:100px;height:100px;margin:0 auto 22px;
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+.orb-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:2px solid transparent;
+  background:linear-gradient(var(--bg),var(--bg)) padding-box,
+              conic-gradient(from 0deg,var(--gold),var(--p2),var(--p),var(--p3),var(--gold)) border-box;
+  animation:orbSpin 5s linear infinite;
+}
+@keyframes orbSpin{to{transform:rotate(360deg);}}
+.orb-glow{
+  position:absolute;inset:-14px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,200,66,0.15) 0%,transparent 70%);
+  animation:glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+.orb-icon{position:relative;z-index:1;font-size:44px;animation:iconFloat 3s ease-in-out infinite;}
+@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.brand{font-size:11px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.big-title{
+  font-size:40px;font-weight:900;line-height:1.1;margin-bottom:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2),#f5a623);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.login-sub{color:var(--muted);font-size:14px;line-height:1.8;}
+.login-sub strong{color:var(--gold);background:rgba(245,200,66,0.08);padding:1px 6px;border-radius:4px;}
+
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:24px;margin-top:14px;}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:8px;display:block;letter-spacing:.5px;}
+.inp{
+  width:100%;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);
+  border-radius:14px;padding:14px 16px;color:var(--text);
+  font-family:'Tajawal',sans-serif;font-size:16px;outline:none;
+  transition:border-color .3s,box-shadow .3s;text-align:right;
+}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,66,0.12);}
+.inp::placeholder{color:var(--muted);}
+.btn-main{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#1a0f00;font-family:'Tajawal',sans-serif;
+  font-size:16px;font-weight:800;cursor:pointer;
+  margin-top:14px;transition:transform .2s,box-shadow .2s;
+}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(245,200,66,0.3);}
+.btn-main:active{transform:translateY(0);}
+
+/* ======= TOPBAR ======= */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0 18px;}
+.greet-sub{font-size:11px;color:var(--muted);letter-spacing:.5px;}
+.greet-name{font-size:19px;font-weight:800;}
+.day-pill{
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  border-radius:20px;padding:7px 16px;font-size:13px;font-weight:800;
+  color:#1a0f00;box-shadow:0 4px 15px rgba(245,200,66,0.25);
+}
+
+/* ======= MAP SECTION ======= */
+.map-section{
+  background:var(--map-bg);
+  border:2px solid var(--map-border);
+  border-radius:20px;overflow:hidden;
+  margin-bottom:18px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,200,66,0.08);
+  position:relative;
+}
+.map-header{
+  padding:12px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(245,200,66,0.1);
+  background:rgba(245,200,66,0.03);
+}
+.map-label{
+  font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+}
+.map-label::before{content:'';width:14px;height:1px;background:var(--gold);}
+.map-steps{font-size:12px;color:var(--muted);}
+
+/* The actual map canvas */
+.map-canvas-wrap{
+  position:relative;width:100%;
+  padding-bottom:70%;
+  overflow:hidden;
+  background:linear-gradient(160deg,#1a1208 0%,#0e0a04 100%);
+}
+.map-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+.map-hint{
+  padding:10px 16px 13px;text-align:center;
+  font-size:13px;color:var(--muted);
+  border-top:1px solid rgba(245,200,66,0.06);
+}
+.map-hint .hl{color:var(--gold);}
+
+/* step dots */
+.map-dots{
+  padding:0 16px 13px;
+  display:flex;gap:3px;
+}
+.mdot{
+  flex:1;height:3px;border-radius:3px;
+  background:rgba(255,255,255,0.06);transition:all .5s;
+}
+.mdot.lit{background:linear-gradient(90deg,var(--gold2),var(--gold));}
+.mdot.now{background:linear-gradient(90deg,var(--gold),#fff);box-shadow:0 0 8px rgba(245,200,66,0.6);}
+
+/* ======= PROGRESS ======= */
+.prog-wrap{margin-bottom:18px;}
+.prog-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-lbl{font-size:12px;color:var(--muted);}
+.prog-val{font-size:12px;font-weight:700;color:var(--gold);}
+.prog-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;}
+.prog-fill{
+  height:100%;border-radius:10px;
+  background:linear-gradient(90deg,var(--gold2),var(--gold));
+  transition:width 1.4s cubic-bezier(.16,1,.3,1);position:relative;
+}
+.prog-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+  animation:shim 2.5s infinite;
+}
+@keyframes shim{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+
+/* ======= TASKS ======= */
+.tasks-hd{font-size:12px;font-weight:700;margin-bottom:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;}
+.task-card{background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:15px;margin-bottom:10px;transition:border-color .3s,background .3s;}
+.task-card.done{border-color:rgba(245,200,66,0.3);background:rgba(245,200,66,0.03);}
+.task-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+.task-left{display:flex;align-items:center;gap:10px;}
+.task-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.task-ico.s{background:rgba(155,93,229,0.12);}
+.task-ico.m{background:rgba(245,200,66,0.1);}
+.task-nm{font-size:14px;font-weight:700;}
+.task-check{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .3s;}
+.task-check.ok{background:linear-gradient(135deg,var(--gold2),var(--gold));border-color:transparent;}
+.upload-zone{background:rgba(255,255,255,0.025);border:1.5px dashed rgba(255,255,255,0.08);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+.upload-zone:hover{border-color:var(--gold);background:rgba(245,200,66,0.04);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-txt{font-size:13px;color:var(--muted);}
+.upload-txt span{color:var(--gold);font-weight:600;}
+.upload-prev{width:100%;max-height:100px;object-fit:cover;border-radius:9px;display:none;}
+.btn-done{width:100%;padding:12px;border:none;border-radius:11px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a0f00;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:9px;display:none;transition:all .2s;}
+.btn-done:hover{transform:translateY(-1px);}
+.btn-wa-share{
+  width:100%;padding:11px;border:none;border-radius:12px;margin-top:8px;
+  background:linear-gradient(135deg,#25d366,#128c7e);
+  color:#fff;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;display:block;
+}
+.btn-wa-share:active{opacity:.85;}
+.done-badge{display:none;align-items:center;justify-content:center;gap:6px;padding:9px;background:rgba(245,200,66,0.08);border-radius:9px;color:var(--gold);font-size:13px;font-weight:600;margin-top:9px;}
+
+/* ======= DAY DONE ======= */
+.day-done{display:none;background:linear-gradient(135deg,rgba(245,200,66,0.1),rgba(155,93,229,0.07));border:1px solid rgba(245,200,66,0.2);border-radius:20px;padding:22px;text-align:center;margin-top:14px;}
+.day-done.show{display:block;animation:fadeUp .5s ease;}
+.dd-emoji{font-size:34px;margin-bottom:10px;}
+.dd-title{font-size:17px;font-weight:800;margin-bottom:8px;color:var(--gold);}
+.dd-map-preview{
+  font-size:13px;color:var(--muted);
+  padding:10px 14px;border-radius:10px;
+  background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.12);
+  margin-bottom:12px;font-style:italic;
+}
+.dd-map-preview span{color:var(--gold);}
+.dd-sub{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;}
+.dd-sub em{color:var(--p2);}
+
+/* ======= TREASURE FINALE ======= */
+#s-finale{display:none;min-height:100vh;flex-direction:column;}
+#s-finale.active{display:flex;animation:fadeUp .5s ease both;}
+
+.finale-bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -5%,rgba(245,200,66,0.18) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 20% 90%,rgba(155,93,229,0.1) 0%,transparent 50%),
+    radial-gradient(ellipse 40% 30% at 85% 70%,rgba(241,91,181,0.08) 0%,transparent 50%),
+    var(--bg);
+}
+
+.finale-wrap{position:relative;z-index:1;max-width:420px;margin:0 auto;padding:28px 14px 60px;width:100%;}
+
+/* chest animation */
+.chest-hero{text-align:center;margin-bottom:28px;}
+.chest-wrap{
+  width:110px;height:110px;margin:0 auto 16px;
+  position:relative;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.chest-glow{
+  position:absolute;inset:-20px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,200,66,0.25) 0%,transparent 70%);
+  animation:chestGlow 2s ease-in-out infinite;
+}
+@keyframes chestGlow{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+.chest-icon{
+  position:relative;z-index:1;font-size:62px;
+  animation:chestShake 1s ease-in-out infinite;
+  transition:transform .3s;
+}
+@keyframes chestShake{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(-3deg)}
+  75%{transform:rotate(3deg)}
+}
+.chest-wrap:hover .chest-icon{transform:scale(1.1);}
+.chest-tap{font-size:12px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;animation:tapBlink 1.5s ease-in-out infinite;}
+@keyframes tapBlink{0%,100%{opacity:.5}50%{opacity:1}}
+
+.finale-tag{display:inline-block;padding:5px 16px;background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.25);border-radius:20px;font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+.finale-title{font-size:30px;font-weight:900;line-height:1.2;margin-bottom:8px;background:linear-gradient(135deg,var(--gold),#f5a623,var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.finale-sub{font-size:14px;color:var(--muted);line-height:1.7;}
+
+/* treasure items */
+.treasures{margin-top:24px;}
+.treasure-item{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;overflow:hidden;margin-bottom:14px;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .6s ease,transform .6s ease,border-color .3s;
+}
+.treasure-item.revealed{opacity:1;transform:translateY(0);}
+.treasure-item:hover{border-color:rgba(245,200,66,0.2);}
+
+.ti-header{
+  padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;
+  background:linear-gradient(135deg,rgba(245,200,66,0.05),transparent);
+}
+.ti-num{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#1a0f00;
+}
+.ti-meta{flex:1;}
+.ti-title{font-size:14px;font-weight:700;margin-bottom:2px;}
+.ti-sub{font-size:11px;color:var(--muted);}
+.ti-toggle{font-size:18px;transition:transform .3s;color:var(--gold);}
+.ti-toggle.open{transform:rotate(180deg);}
+
+.ti-body{
+  max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.16,1,.3,1);
+}
+.ti-body.open{max-height:600px;}
+.ti-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(245,200,66,0.15),transparent);}
+
+/* Letter treasure */
+.letter-inner{padding:18px 16px;}
+.ai-loading{text-align:center;padding:20px;}
+.ai-dots{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;}
+.ald{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:aldP 1.2s ease-in-out infinite;}
+.ald:nth-child(2){animation-delay:.2s;background:var(--p2);}
+.ald:nth-child(3){animation-delay:.4s;background:var(--p3);}
+@keyframes aldP{0%,100%{transform:scale(.7);opacity:.5}50%{transform:scale(1.2);opacity:1}}
+.ai-load-txt{font-size:13px;color:var(--muted);}
+.ai-load-txt strong{color:var(--gold);}
+
+.full-letter{
+  background:linear-gradient(160deg,#1c1508 0%,#100d04 100%);
+  border-radius:12px;padding:20px 16px;
+  font-family:'Amiri',serif;font-size:17px;line-height:2.2;color:var(--text);
+  position:relative;overflow:hidden;
+}
+.full-letter::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(245,200,66,0.03) 30px,rgba(245,200,66,0.03) 31px);
+  pointer-events:none;
+}
+.fl-text{position:relative;z-index:1;animation:fadeIn 1s ease both;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fl-text p{margin-bottom:8px;}
+.fl-text em{color:var(--gold);font-style:normal;text-shadow:0 0 14px rgba(245,200,66,0.3);}
+.fl-sig{position:relative;z-index:1;margin-top:16px;padding-top:12px;border-top:1px solid rgba(245,200,66,0.1);text-align:left;}
+.fl-sig-from{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.fl-sig-name{font-size:16px;font-weight:700;background:linear-gradient(135deg,var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.letter-error{text-align:center;padding:16px;}
+.letter-error p{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.btn-retry{padding:9px 20px;border:1.5px solid var(--gold);border-radius:10px;background:transparent;color:var(--gold);font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-retry:hover{background:rgba(245,200,66,0.08);}
+
+/* Card treasure */
+.card-inner{padding:18px 16px;}
+.id-card{border-radius:20px;padding:22px;min-height:260px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;}
+.card-pattern{position:absolute;inset:0;pointer-events:none;}
+.card-brand-lbl{font-size:9px;letter-spacing:4px;text-transform:uppercase;opacity:.5;position:relative;z-index:1;}
+.card-av{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:10px 0;position:relative;z-index:1;}
+.card-uname{font-size:22px;font-weight:900;position:relative;z-index:1;margin-bottom:2px;}
+.card-sub-lbl{font-size:11px;opacity:.55;position:relative;z-index:1;margin-bottom:12px;}
+.card-rank{display:inline-block;padding:4px 13px;border-radius:16px;font-size:12px;font-weight:700;position:relative;z-index:1;margin-bottom:14px;}
+.card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;position:relative;z-index:1;}
+.stat{text-align:center;}
+.stat-n{font-size:17px;font-weight:900;display:block;}
+.stat-l{font-size:9px;opacity:.5;display:block;margin-top:1px;}
+.card-ft{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;opacity:.5;}
+.theme-rose{background:linear-gradient(145deg,#1c0a16,#2d1020);color:#ffeef8;border:1px solid rgba(241,91,181,0.2);box-shadow:0 16px 50px rgba(241,91,181,0.12);}
+.theme-violet{background:linear-gradient(145deg,#130b22,#1e1032);color:#f0eeff;border:1px solid rgba(155,93,229,0.2);box-shadow:0 16px 50px rgba(155,93,229,0.12);}
+.theme-gold{background:linear-gradient(145deg,#1c1300,#2c1e00);color:#fff9ee;border:1px solid rgba(245,200,66,0.2);box-shadow:0 16px 50px rgba(245,200,66,0.1);}
+.theme-teal{background:linear-gradient(145deg,#041418,#071e24);color:#eefffc;border:1px solid rgba(0,187,249,0.18);box-shadow:0 16px 50px rgba(0,187,249,0.1);}
+
+/* ======= CARD UPGRADED ======= */
+.card-toprow{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-bottom:14px;}
+.card-holo{font-size:18px;opacity:.6;animation:holoSpin 4s linear infinite;}
+@keyframes holoSpin{0%{transform:rotate(0) scale(1);opacity:.6}50%{transform:rotate(180deg) scale(1.2);opacity:1}100%{transform:rotate(360deg) scale(1);opacity:.6}}
+.card-identity{display:flex;align-items:center;gap:14px;position:relative;z-index:1;margin-bottom:14px;}
+.card-av-wrap{position:relative;flex-shrink:0;}
+.card-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(255,255,255,0.08);}
+.card-av-ring{position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;background:conic-gradient(from 0deg,var(--gold),var(--p2),var(--p3),var(--gold)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;mask-composite:exclude;animation:orbSpin 4s linear infinite;}
+.card-name-block{flex:1;}
+.card-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);margin-bottom:14px;position:relative;z-index:1;}
+.card-bars{position:relative;z-index:1;margin-top:12px;display:flex;flex-direction:column;gap:7px;}
+.card-bar-row{display:flex;align-items:center;gap:8px;}
+.bar-lbl{font-size:10px;color:rgba(255,255,255,0.4);width:46px;text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:5px;transition:width 1.5s cubic-bezier(.16,1,.3,1);}
+.bar-sport{background:linear-gradient(90deg,var(--p),var(--p2));}
+.bar-meal{background:linear-gradient(90deg,#00bbf9,#00f5a0);}
+.bar-val{font-size:10px;color:rgba(255,255,255,0.4);width:30px;flex-shrink:0;}
+
+/* Prize treasure */
+.prize-inner{padding:18px 16px;}
+.prize-banner{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1c1200,#2a1800,#1c1200);
+  border:1px solid rgba(245,200,66,0.35);border-radius:18px;
+  padding:22px 18px 20px;margin-bottom:16px;text-align:center;
+}
+.prize-banner-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(245,200,66,0.18) 0%,transparent 70%);pointer-events:none;}
+.prize-banner-content{position:relative;z-index:1;}
+.prize-crown-row{font-size:36px;margin-bottom:8px;animation:iconFloat 3s ease-in-out infinite;}
+.prize-banner-title{font-size:20px;font-weight:900;line-height:1.3;color:var(--gold3);margin-bottom:10px;}
+.prize-banner-title em{color:var(--gold);font-style:normal;text-shadow:0 0 20px rgba(245,200,66,0.5);}
+.prize-banner-sub{font-size:13px;color:rgba(245,238,221,0.7);line-height:1.7;font-family:'Amiri',serif;}
+.prize-coming-lbl{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.prize-items{margin-top:0;}
+.prize-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;margin-bottom:8px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  border-radius:13px;
+  animation:prizeIn .5s ease both;
+}
+@keyframes prizeIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.prize-row:last-child{margin-bottom:0;}
+.prize-ico{font-size:24px;flex-shrink:0;}
+.prize-txt{flex:1;}
+.prize-share-btn{width:100%;margin-top:14px;}
+.prize-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.prize-desc{font-size:11px;color:var(--muted);}
+
+/* share buttons */
+.share-row{display:flex;gap:8px;margin-top:14px;}
+.btn-share{
+  flex:1;padding:13px;border:1.5px solid var(--gold);
+  border-radius:12px;background:transparent;color:var(--gold);
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+}
+.btn-share:hover{background:rgba(245,200,66,0.08);transform:translateY(-1px);}
+
+/* ======= UTILS ======= */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);border-radius:13px;padding:11px 22px;font-size:13px;font-weight:600;z-index:9999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.cfx{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;}
+.cfx-p{position:absolute;top:-10px;animation:cfxFall linear forwards;}
+@keyframes cfxFall{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="cfx" id="cfx"></div>
+<div class="toast" id="toast"></div>
+
+<div class="wrap">
+
+<!-- ======= LOGIN ======= -->
+<div class="screen active" id="s-login">
+  <div class="login-top">
+    <div class="map-orb">
+      <div class="orb-glow"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-icon">🗺️</div>
+    </div>
+    <div class="brand">نيومي</div>
+    <div class="big-title">خريطة<br>الكنز</div>
+    <p class="login-sub">
+      كل يوم تكملين مهامك...<br>
+      <strong>الخريطة تتكشف</strong> وتقتربين من الكنز.<br>
+      في اليوم ١٤... يُفتح الصندوق 🏴‍☠️
+    </p>
+  </div>
+  <div class="login-card">
+    <label class="lbl">اكتبي اسمك عشان تبدأي رحلتك 👇</label>
+    <input class="inp" id="nameInp" placeholder="اسمك هنا..." type="text"/>
+    <button class="btn-main" onclick="startChallenge()">ابدأي الرحلة 🗺️</button>
+  </div>
+</div>
+
+<!-- ======= MAIN ======= -->
+<div class="screen" id="s-main">
+  <div class="topbar">
+    <div>
+      <div class="greet-sub">المستكشفة</div>
+      <div class="greet-name" id="dName">—</div>
+    </div>
+    <div class="day-pill">يوم <span id="dDay">1</span> / ١٤</div>
+  </div>
+
+  <div class="map-section">
+    <div class="map-header">
+      <div class="map-label">خريطة الكنز</div>
+      <div class="map-steps" id="mapSteps">٠ / ١٤ خطوة</div>
+    </div>
+    <div class="map-canvas-wrap">
+      <canvas id="mapCanvas"></canvas>
+    </div>
+    <div class="map-hint" id="mapHint"></div>
+    <div class="map-dots" id="mapDots"></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-top">
+      <span class="prog-lbl">تقدمك في التحدي</span>
+      <span class="prog-val" id="progTxt">٠ / ١٤</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="tasks-hd">مهام اليوم</div>
+
+  <div class="task-card" id="tSport">
+    <div class="task-row">
+      <div class="task-left"><div class="task-ico s">🏋️</div><div class="task-nm">التمارين الرياضية</div></div>
+      <div class="task-check" id="ckSport"></div>
+    </div>
+    <div class="upload-zone" id="uzSport">
+      <input type="file" accept="image/*" onchange="onUpload(this,'sport')"/>
+      <img class="upload-prev" id="pvSport"/>
+      <div class="upload-txt" id="utSport">📸 ارفعي صورة تمارينك<br><span>اضغطي هنا</span></div>
+    </div>
+    <button class="btn-done" id="bdSport" onclick="completeTask('sport')">✅ أكملت التمارين!</button>
+    <div class="done-badge" id="dbSport">✨ رائعة! التمارين مكتملة</div>
+    <button class="btn-wa-share" id="waSport" onclick="shareOnWhatsapp('sport')" style="display:none">📤 شاركي على واتساب</button>
+  </div>
+
+  <div class="task-card" id="tMeal">
+    <div class="task-row">
+      <div class="task-left"><div class="task-ico m">🥗</div><div class="task-nm">الوجبات الغذائية</div></div>
+      <div class="task-check" id="ckMeal"></div>
+    </div>
+    <div class="upload-zone" id="uzMeal">
+      <input type="file" accept="image/*" onchange="onUpload(this,'meal')"/>
+      <img class="upload-prev" id="pvMeal"/>
+      <div class="upload-txt" id="utMeal">📸 ارفعي صورة وجبتك<br><span>اضغطي هنا</span></div>
+    </div>
+    <button class="btn-done" id="bdMeal" onclick="completeTask('meal')">✅ أكملت الوجبات!</button>
+    <div class="done-badge" id="dbMeal">✨ ممتازة! الوجبات مكتملة</div>
+    <button class="btn-wa-share" id="waMeal" onclick="shareOnWhatsapp('meal')" style="display:none">📤 شاركي على واتساب</button>
+  </div>
+
+  <div class="day-done" id="dayDone">
+    <div class="dd-emoji">🗺️</div>
+    <div class="dd-title" id="ddTitle">خطوة جديدة على الخريطة!</div>
+    <div class="dd-map-preview" id="ddPreview"></div>
+    <div class="dd-sub" id="ddSub"></div>
+    <button class="btn-main" id="ddBtn">اليوم التالي ←</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ======= FINALE ======= -->
+<div class="screen" id="s-finale">
+  <div class="finale-bg"></div>
+  <div class="finale-wrap">
+
+    <div class="chest-hero">
+      <div class="chest-wrap" onclick="openChest()" id="chestWrap">
+        <div class="chest-glow"></div>
+        <div class="chest-icon" id="chestIcon">🎁</div>
+      </div>
+      <div class="chest-tap" id="chestTap">اضغطي لتفتحي الكنز</div>
+      <div class="finale-tag" style="margin-top:14px;">وصلتِ يا <span id="finaleNameTag">—</span>!</div>
+      <div class="finale-title" id="finaleTitle">الكنز<br>ينتظرك! 🏆</div>
+      <div class="finale-sub">أكملتِ ١٤ يوم كاملة...<br>٣ كنوز خاصة بكِ تنتظر</div>
+    </div>
+
+    <div class="treasures" id="treasures" style="display:none">
+
+      <!-- Treasure 1: AI Letter -->
+      <div class="treasure-item" id="t1">
+        <div class="ti-header" onclick="toggleTreasure(1)">
+          <div class="ti-num">١</div>
+          <div class="ti-meta">
+            <div class="ti-title">💌 رسالتك الشخصية</div>
+            <div class="ti-sub">كتبها الذكاء الاصطناعي خصيصاً لكِ</div>
+          </div>
+          <div class="ti-toggle" id="tog1">▼</div>
+        </div>
+        <div class="ti-body" id="tb1">
+          <div class="ti-divider"></div>
+          <div class="letter-inner">
+            <div id="aiLetterBody">
+              <div class="ai-loading">
+                <div class="ai-dots"><div class="ald"></div><div class="ald"></div><div class="ald"></div></div>
+                <div class="ai-load-txt">يكتب رسالتك...<br><strong>هذه الرسالة لكِ وحدكِ</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Treasure 2: ID Card -->
+      <div class="treasure-item" id="t2">
+        <div class="ti-header" onclick="toggleTreasure(2)">
+          <div class="ti-num">٢</div>
+          <div class="ti-meta">
+            <div class="ti-title">🏅 بطاقتك الرياضية</div>
+            <div class="ti-sub">فريدة — لا يوجد مثلها لأحد</div>
+          </div>
+          <div class="ti-toggle" id="tog2">▼</div>
+        </div>
+        <div class="ti-body" id="tb2">
+          <div class="ti-divider"></div>
+          <div class="card-inner">
+            <div class="id-card" id="idCard">
+              <svg class="card-pattern" id="cardPat" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice"></svg>
+              <div class="card-toprow">
+                <div class="card-brand-lbl">NEOMI × خريطة الكنز</div>
+                <div class="card-holo" id="cHolo">✦</div>
+              </div>
+              <div class="card-identity">
+                <div class="card-av-wrap">
+                  <div class="card-av" id="cAv">⚡</div>
+                  <div class="card-av-ring"></div>
+                </div>
+                <div class="card-name-block">
+                  <div class="card-uname" id="cName">—</div>
+                  <div class="card-sub-lbl">مستكشفة الكنز</div>
+                  <div class="card-rank" id="cRank">—</div>
+                </div>
+              </div>
+              <div class="card-divider"></div>
+              <div class="card-stats">
+                <div class="stat"><span class="stat-n" id="sDays">14</span><span class="stat-l">يوم أكملت</span></div>
+                <div class="stat"><span class="stat-n" id="sSport">—</span><span class="stat-l">💪 القوة الرياضية</span></div>
+                <div class="stat"><span class="stat-n" id="sMeal">—</span><span class="stat-l">🥗 الانضباط الغذائي</span></div>
+              </div>
+              <div class="card-bars">
+                <div class="card-bar-row">
+                  <span class="bar-lbl">التمارين</span>
+                  <div class="bar-track"><div class="bar-fill bar-sport" id="barSport"></div></div>
+                  <span class="bar-val" id="barSportVal">0/14</span>
+                </div>
+                <div class="card-bar-row">
+                  <span class="bar-lbl">التغذية</span>
+                  <div class="bar-track"><div class="bar-fill bar-meal" id="barMeal"></div></div>
+                  <span class="bar-val" id="barMealVal">0/14</span>
+                </div>
+              </div>
+              <div class="card-ft"><span>🗺️ خريطة الكنز · ١٤ يوم</span><span id="cDate">—</span></div>
+            </div>
+            <div class="share-row">
+              <button class="btn-share" onclick="shareCard()">📤 شاركي</button>
+              <button class="btn-share" onclick="copyCard()">📋 انسخي</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Treasure 3: Prize Announce -->
+      <div class="treasure-item" id="t3">
+        <div class="ti-header" onclick="toggleTreasure(3)">
+          <div class="ti-num">٣</div>
+          <div class="ti-meta">
+            <div class="ti-title">🎁 الخبر الكبير</div>
+            <div class="ti-sub">إعلان حصري لمن أكملت الرحلة</div>
+          </div>
+          <div class="ti-toggle" id="tog3">▼</div>
+        </div>
+        <div class="ti-body" id="tb3">
+          <div class="ti-divider"></div>
+          <div class="prize-inner">
+
+            <!-- big announcement banner -->
+            <div class="prize-banner">
+              <div class="prize-banner-glow"></div>
+              <div class="prize-banner-content">
+                <div class="prize-crown-row">🏆</div>
+                <div class="prize-banner-title">إعلان رسمي<br>التحديات القادمة<br>فيها جوائز <em>حقيقية</em>!</div>
+                <div class="prize-banner-sub">
+                  أثبتِ إنكِ جادة — وهذا الإعلان لكِ وحدكِ أنتِ من أكملت الرحلة.<br>
+                  نيومي تُعلن رسمياً: التحديات الجاية فيها مكافآت حقيقية بيدك — مش شهادات، مش كلام — جوائز فعلية للمتميزات.
+                </div>
+              </div>
+            </div>
+
+            <!-- what's coming -->
+            <div class="prize-coming-lbl">وش يعني هذا؟ 👇</div>
+            <div class="prize-items">
+              <div class="prize-row" style="animation-delay:.05s">
+                <div class="prize-ico">🥇</div>
+                <div class="prize-txt">
+                  <div class="prize-name">جوائز مادية حقيقية — مضمونة</div>
+                  <div class="prize-desc">للمتميزات في الالتزام والإنجاز — مش وعود فاضية</div>
+                </div>
+              </div>
+              <div class="prize-row" style="animation-delay:.15s">
+                <div class="prize-ico">📣</div>
+                <div class="prize-txt">
+                  <div class="prize-name">أنتِ أول من تعرف</div>
+                  <div class="prize-desc">هذا الإعلان حصري فقط لمن أكملت خريطة الكنز</div>
+                </div>
+              </div>
+              <div class="prize-row" style="animation-delay:.25s">
+                <div class="prize-ico">⚡</div>
+                <div class="prize-txt">
+                  <div class="prize-name">تحديات أقوى قادمة</div>
+                  <div class="prize-desc">مستوى جديد كلياً — ومعه جوائز بمستوى إنجازك</div>
+                </div>
+              </div>
+              <div class="prize-row" style="animation-delay:.35s">
+                <div class="prize-ico">🔔</div>
+                <div class="prize-txt">
+                  <div class="prize-name">ترقبي الإعلان الرسمي</div>
+                  <div class="prize-desc">تابعي نيومي عشان تكوني أول المشاركات</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-share prize-share-btn" onclick="sharePrize()">📤 شاركي الخبر مع صاحباتك</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Restart -->
+    <div style="text-align:center;margin-top:30px;padding-bottom:20px;">
+      <button onclick="restartChallenge()" style="background:transparent;border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 24px;color:rgba(255,255,255,0.35);font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;">
+        🔄 إعادة التحدي من البداية
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ============ MAP DATA ============
+// 14 waypoints on the map journey
+const WAYPOINTS = [
+  { label:"البداية",      emoji:"🏠", x:.08, y:.82 },
+  { label:"الغابة",       emoji:"🌲", x:.18, y:.65 },
+  { label:"النهر",        emoji:"🌊", x:.28, y:.72 },
+  { label:"الجبل",        emoji:"⛰️", x:.22, y:.50 },
+  { label:"الكهف",        emoji:"🕳️", x:.35, y:.40 },
+  { label:"الصحراء",      emoji:"🏜️", x:.50, y:.55 },
+  { label:"الواحة",       emoji:"🌴", x:.62, y:.45 },
+  { label:"المدينة",      emoji:"🏰", x:.55, y:.28 },
+  { label:"البحر",        emoji:"⛵", x:.70, y:.35 },
+  { label:"الجزيرة",      emoji:"🏝️", x:.80, y:.48 },
+  { label:"المقبرة",      emoji:"💀", x:.72, y:.62 },
+  { label:"الكنز قريب",   emoji:"✨", x:.85, y:.70 },
+  { label:"العلامة X",    emoji:"❌", x:.88, y:.55 },
+  { label:"الكنز!",       emoji:"🏴‍☠️", x:.92, y:.38 },
+];
+
+const MAP_HINTS = [
+  "أكملي مهامك لتتحرك على الخريطة... 🗺️",
+  "خطوة أولى! الطريق طويل... 🌲",
+  "عبرتِ النهر! البنت الشجاعة ⛰️",
+  "وصلتِ الجبل! نصف الطريق يقترب 🕳️",
+  "دخلتِ الكهف... لا رجعة الحين! 🏜️",
+  "منتصف الصحراء... ابقي قوية 🌴",
+  "الواحة! استريحي لثانية ثم كملي 🏰",
+  "نصف الطريق! المدينة خلفكِ ⛵",
+  "البحر! الكنز في الجهة الثانية 🏝️",
+  "الجزيرة! اقتربتِ جداً ✨",
+  "المقبرة... شجاعتكِ أكبر من الخوف ❌",
+  "علامة X تقترب... ٢ يوم فقط! 🏴‍☠️",
+  "يوم واحد آخر... الكنز ينتظرك 👑",
+  "🎊 وصلتِ! الكنز أمامكِ!",
+];
+
+// ============ STATE ============
+let S={name:'',day:1,completed:0,sportCount:0,mealCount:0,sportDone:false,mealDone:false,aiLetter:'',lastPlayedDate:''};
+function storeKey(n){return 'nm_map_'+((n||S.name)||'x');}
+
+// ---- IndexedDB storage (most reliable, works on file://) ----
+let _db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    if(_db){res(_db);return;}
+    const req=indexedDB.open('neomi_db',1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore('data');
+    req.onsuccess=e=>{_db=e.target.result;res(_db);};
+    req.onerror=()=>rej();
+  });
+}
+async function idbSet(key,val){
+  try{const db=await openDB();const tx=db.transaction('data','readwrite');tx.objectStore('data').put(val,key);}catch(e){}
+}
+async function idbGet(key){
+  try{const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction('data','readonly');const req=tx.objectStore('data').get(key);req.onsuccess=()=>res(req.result);req.onerror=()=>res(null);});}catch(e){return null;}
+}
+async function idbDel(key){
+  try{const db=await openDB();const tx=db.transaction('data','readwrite');tx.objectStore('data').delete(key);}catch(e){}
+}
+
+async function load(name){
+  const key=storeKey(name);
+  let d=null;
+  // 1. IndexedDB (best)
+  try{d=await idbGet(key);}catch(e){}
+  // 2. localStorage fallback
+  if(!d)try{d=localStorage.getItem(key);}catch(e){}
+  if(d)try{S={...S,...JSON.parse(d)};}catch(e){}
+}
+async function save(){
+  const key=storeKey();
+  const val=JSON.stringify(S);
+  await idbSet(key,val);
+  try{localStorage.setItem(key,val);}catch(e){}
+}
+
+// ============ CANVAS MAP ============
+let canvas, ctx, CW, CH;
+function initMap(){
+  canvas=document.getElementById('mapCanvas');
+  const parent=canvas.parentElement;
+  CW=parent.offsetWidth; CH=parent.offsetHeight||CW*0.7;
+  canvas.width=CW; canvas.height=CH;
+  ctx=canvas.getContext('2d');
+  drawMap(S.completed);
+}
+
+function drawMap(revealed){
+  if(!ctx)return;
+  ctx.clearRect(0,0,CW,CH);
+
+  // parchment bg
+  const bgGrad=ctx.createLinearGradient(0,0,CW,CH);
+  bgGrad.addColorStop(0,'#1e1508');
+  bgGrad.addColorStop(0.5,'#150f06');
+  bgGrad.addColorStop(1,'#1a1208');
+  ctx.fillStyle=bgGrad;
+  ctx.fillRect(0,0,CW,CH);
+
+  // grid lines (map texture)
+  ctx.save();
+  for(let x=0;x<CW;x+=CW/8){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CH);
+    ctx.strokeStyle='rgba(245,200,66,0.04)';ctx.lineWidth=.5;ctx.stroke();
+  }
+  for(let y=0;y<CH;y+=CH/6){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CW,y);
+    ctx.strokeStyle='rgba(245,200,66,0.04)';ctx.lineWidth=.5;ctx.stroke();
+  }
+  ctx.restore();
+
+  // terrain decorations
+  drawTerrain(revealed);
+
+  // path between waypoints
+  drawPath(revealed);
+
+  // waypoints
+  for(let i=0;i<WAYPOINTS.length;i++){
+    drawWaypoint(i, i<revealed, i===revealed-1);
+  }
+
+  // fog of war over locked areas
+  drawFog(revealed);
+
+  // character/player dot
+  if(revealed>0){
+    const wp=WAYPOINTS[Math.min(revealed-1,WAYPOINTS.length-1)];
+    drawPlayer(wp.x*CW, wp.y*CH);
+  }
+}
+
+function drawTerrain(revealed){
+  // decorative terrain elements
+  const terrains=[
+    {x:.15,y:.78,e:'🌿',s:12},{x:.25,y:.60,e:'🌾',s:10},
+    {x:.40,y:.68,e:'🏔️',s:14},{x:.58,y:.38,e:'☁️',s:12},
+    {x:.45,y:.22,e:'⭐',s:10},{x:.75,y:.20,e:'🌙',s:12},
+    {x:.10,y:.40,e:'🦅',s:11},{x:.65,y:.72,e:'💀',s:10},
+  ];
+  terrains.forEach(t=>{
+    ctx.font=`${t.s}px Arial`;
+    ctx.globalAlpha=0.25;
+    ctx.fillText(t.e,t.x*CW,t.y*CH);
+    ctx.globalAlpha=1;
+  });
+}
+
+function drawPath(revealed){
+  if(revealed<2)return;
+  ctx.save();
+  ctx.strokeStyle='rgba(245,200,66,0.5)';
+  ctx.lineWidth=2;
+  ctx.setLineDash([5,5]);
+  ctx.shadowColor='rgba(245,200,66,0.4)';
+  ctx.shadowBlur=6;
+  ctx.beginPath();
+  for(let i=0;i<Math.min(revealed,WAYPOINTS.length);i++){
+    const wp=WAYPOINTS[i];
+    if(i===0)ctx.moveTo(wp.x*CW,wp.y*CH);
+    else ctx.lineTo(wp.x*CW,wp.y*CH);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function drawWaypoint(idx, unlocked, isCurrent){
+  const wp=WAYPOINTS[idx];
+  const x=wp.x*CW, y=wp.y*CH;
+  const r=Math.max(10,CW*0.04);
+
+  if(unlocked){
+    // glow
+    const grd=ctx.createRadialGradient(x,y,0,x,y,r*1.8);
+    grd.addColorStop(0,isCurrent?'rgba(245,200,66,0.4)':'rgba(245,200,66,0.15)');
+    grd.addColorStop(1,'rgba(245,200,66,0)');
+    ctx.fillStyle=grd;
+    ctx.fillRect(x-r*1.8,y-r*1.8,r*3.6,r*3.6);
+
+    // circle
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=isCurrent?'rgba(245,200,66,0.3)':'rgba(245,200,66,0.15)';
+    ctx.fill();
+    ctx.strokeStyle=isCurrent?'rgba(245,200,66,0.9)':'rgba(245,200,66,0.5)';
+    ctx.lineWidth=isCurrent?2:1;ctx.stroke();
+
+    // emoji
+    const fontSize=Math.max(10,CW*0.042);
+    ctx.font=`${fontSize}px Arial`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(wp.emoji,x,y);
+
+    // label
+    const lblSize=Math.max(7,CW*0.025);
+    ctx.font=`bold ${lblSize}px Tajawal, Arial`;
+    ctx.fillStyle=isCurrent?'rgba(245,200,66,1)':'rgba(245,200,66,0.7)';
+    ctx.fillText(wp.label,x,y+r+lblSize);
+  } else {
+    // locked waypoint
+    ctx.beginPath();ctx.arc(x,y,r*.7,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.04)';ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.stroke();
+    ctx.font=`${Math.max(8,CW*0.03)}px Arial`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=0.15;ctx.fillText('🔒',x,y);ctx.globalAlpha=1;
+  }
+}
+
+function drawFog(revealed){
+  if(revealed>=14)return;
+  const startX=revealed<WAYPOINTS.length?WAYPOINTS[Math.max(0,revealed-1)].x*CW:CW;
+  const fogGrad=ctx.createLinearGradient(startX,0,Math.min(startX+CW*.3,CW),0);
+  fogGrad.addColorStop(0,'rgba(10,8,4,0)');
+  fogGrad.addColorStop(.3,'rgba(10,8,4,0.7)');
+  fogGrad.addColorStop(1,'rgba(10,8,4,0.92)');
+  ctx.fillStyle=fogGrad;
+  ctx.fillRect(startX,0,CW-startX,CH);
+}
+
+function drawPlayer(x,y){
+  const r=Math.max(8,CW*0.03);
+  // pulsing ring
+  ctx.beginPath();ctx.arc(x,y,r*1.6,0,Math.PI*2);
+  ctx.fillStyle='rgba(245,200,66,0.15)';ctx.fill();
+  // dot
+  ctx.beginPath();ctx.arc(x,y,r*.6,0,Math.PI*2);
+  ctx.fillStyle='#f5c842';
+  ctx.shadowColor='rgba(245,200,66,0.8)';ctx.shadowBlur=12;
+  ctx.fill();
+  ctx.shadowBlur=0;
+}
+
+function updateMapUI(completed, highlightToday=false){
+  document.getElementById('mapSteps').textContent=`${completed} / ١٤ خطوة`;
+  const dots=document.getElementById('mapDots');
+  if(dots){
+    dots.innerHTML='';
+    for(let d=0;d<14;d++){
+      const dot=document.createElement('div');dot.className='mdot';
+      if(d<completed)dot.classList.add('lit');
+      if(d===completed-1&&highlightToday)dot.classList.add('now');
+      dots.appendChild(dot);
+    }
+  }
+  const hint=document.getElementById('mapHint');
+  if(hint){
+    const idx=Math.min(completed,MAP_HINTS.length-1);
+    hint.innerHTML=MAP_HINTS[idx].replace(/(🗺️|🌲|⛰️|🕳️|🏜️|🌴|🏰|⛵|🏝️|✨|❌|🏴‍☠️|👑|🎊)/g,'<span class="hl">$1</span>');
+  }
+}
+
+// ============ LOGIN ============
+async function startChallenge(){
+  const v=document.getElementById('nameInp').value.trim();
+  if(!v){showToast('ادخلي اسمك أولاً 😊');return;}
+  S={name:'',day:1,completed:0,sportCount:0,mealCount:0,sportDone:false,mealDone:false,aiLetter:'',lastPlayedDate:''};
+  try{await load(v);}catch(e){}
+  S.name=v;
+  if(!S.startDate)S.startDate=new Date().toLocaleDateString('ar-SA');
+  try{await save();}catch(e){}
+  showScreen('main');updateMain();setTimeout(initMap,100);
+}
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('s-'+n);
+  el.classList.add('active');window.scrollTo(0,0);
+}
+
+// ============ MAIN ============
+function todayStr(){return new Date().toLocaleDateString('ar-SA');}
+function playedToday(){return S.lastPlayedDate===todayStr();}
+
+function updateMain(){
+  document.getElementById('dName').textContent=S.name;
+  document.getElementById('dDay').textContent=S.day;
+  document.getElementById('progFill').style.width=(S.completed/14*100)+'%';
+  document.getElementById('progTxt').textContent=`${S.completed} / ١٤`;
+  updateMapUI(S.completed,false);
+  resetTaskUI();
+}
+
+function showAlreadyDone(){
+  // hide tasks, show locked message
+  ['sport','meal'].forEach(t=>{
+    document.getElementById('t'+cap(t)).classList.add('done');
+    const ck=document.getElementById('ck'+cap(t));ck.classList.add('ok');ck.textContent='✓';
+    document.getElementById('bd'+cap(t)).style.display='none';
+    document.getElementById('db'+cap(t)).style.display='flex';
+    document.getElementById('uz'+cap(t)).style.pointerEvents='none';
+  });
+  const dd=document.getElementById('dayDone');
+  document.getElementById('ddTitle').textContent='🔒 انتهيتِ من اليوم!';
+  document.getElementById('ddPreview').innerHTML='عدلتِ اليوم بالفعل... <span>عودي غداً لليوم التالي 🌙</span>';
+  document.getElementById('ddPreview').style.display='block';
+  document.getElementById('ddSub').innerHTML='لا يُسمح بالتسجيل أكثر من مرة في نفس اليوم 💪';
+  document.getElementById('ddBtn').style.display='none';
+  dd.classList.add('show');
+}
+
+function resetTaskUI(){
+  S.sportDone=false;S.mealDone=false;
+  ['sport','meal'].forEach(t=>{
+    document.getElementById('t'+cap(t)).classList.remove('done');
+    const ck=document.getElementById('ck'+cap(t));ck.classList.remove('ok');ck.textContent='';
+    document.getElementById('bd'+cap(t)).style.display='none';
+    document.getElementById('db'+cap(t)).style.display='none';
+    document.getElementById('pv'+cap(t)).style.display='none';
+    document.getElementById('ut'+cap(t)).style.display='block';
+    document.getElementById('uz'+cap(t)).style.pointerEvents='auto';
+  });
+  document.getElementById('dayDone').classList.remove('show');
+  document.getElementById('ddBtn').style.display='block';
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+// ============ UPLOAD ============
+function onUpload(inp,type){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const pv=document.getElementById('pv'+cap(type));
+    pv.src=e.target.result;pv.style.display='block';
+    document.getElementById('ut'+cap(type)).style.display='none';
+    document.getElementById('bd'+cap(type)).style.display='block';
+    showToast('تم رفع الصورة ✅');
+    // store image data for sharing
+    if(type==='sport')S._sportImg=e.target.result;
+    else S._mealImg=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function shareOnWhatsapp(type){
+  const label=type==='sport'?'تمارين اليوم 💪':'وجبة اليوم 🥗';
+  const day=S.day||S.completed+1;
+  const imgData=type==='sport'?S._sportImg:S._mealImg;
+  const txt='اليوم '+day+' من خريطة الكنز مع نيومي!\n'+label+'\n#نيومي #خريطة_الكنز';
+
+  // Try native share with image (works on mobile)
+  if(imgData && navigator.share && navigator.canShare){
+    try{
+      const res=await fetch(imgData);
+      const blob=await res.blob();
+      const file=new File([blob],'neomi_day'+day+'.jpg',{type:blob.type});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],text:txt});
+        return;
+      }
+    }catch(e){}
+  }
+
+  // Fallback: save image + open whatsapp text
+  if(imgData){
+    const a=document.createElement('a');
+    a.href=imgData;a.download='neomi_day'+day+'.jpg';a.click();
+    showToast('احفظي الصورة ثم شاركيها على واتساب 📲');
+    setTimeout(()=>{
+      window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+    },1200);
+  } else {
+    window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  }
+}
+
+// ============ COMPLETE TASK ============
+function completeTask(type){
+  if(type==='sport'){S.sportDone=true;S.sportCount++;}
+  else{S.mealDone=true;S.mealCount++;}
+  document.getElementById('t'+cap(type)).classList.add('done');
+  const ck=document.getElementById('ck'+cap(type));
+  ck.classList.add('ok');ck.textContent='✓';
+  document.getElementById('bd'+cap(type)).style.display='none';
+  document.getElementById('db'+cap(type)).style.display='flex';
+  document.getElementById('uz'+cap(type)).style.pointerEvents='none';
+  const waBtn=document.getElementById('wa'+cap(type));
+  if(waBtn)waBtn.style.display='block';
+  save();confetti(12);
+  showToast(type==='sport'?'💪 أحسنتِ على التمارين!':'🥗 وجبة صحية رائعة!');
+  if(S.sportDone&&S.mealDone)checkDayDone();
+}
+
+function checkDayDone(){
+  setTimeout(()=>{
+    S.completed++;
+    S.lastPlayedDate=todayStr();
+    const rem=14-S.completed;
+    const wp=WAYPOINTS[Math.min(S.completed-1,WAYPOINTS.length-1)];
+    document.getElementById('ddTitle').textContent=`وصلتِ ${wp.label}! ${wp.emoji}`;
+    const preview=document.getElementById('ddPreview');
+    preview.innerHTML=`تقدمتِ في الخريطة... <span>${MAP_HINTS[Math.min(S.completed,MAP_HINTS.length-1)]}</span>`;
+    preview.style.display='block';
+    const sub=document.getElementById('ddSub');
+    const btn=document.getElementById('ddBtn');
+    if(S.completed>=14){
+      sub.innerHTML='🎊 وصلتِ للكنز! اضغطي لتفتحيه!';
+      btn.textContent='افتحي الكنز! 🏴‍☠️';
+      btn.onclick=showFinale;
+    } else {
+      sub.innerHTML=`خطوة جديدة على الخريطة... <em>${rem} يوم باقيين</em>`;
+      btn.textContent='اليوم التالي ←';
+      btn.onclick=nextDay;
+    }
+    document.getElementById('dayDone').classList.add('show');
+    updateMapUI(S.completed,true);
+    drawMap(S.completed);
+    document.getElementById('progFill').style.width=(S.completed/14*100)+'%';
+    document.getElementById('progTxt').textContent=`${S.completed} / ١٤`;
+    save();confetti(50);
+  },500);
+}
+
+async function nextDay(){S.day++;await save();updateMain();drawMap(S.completed);}
+
+async function restartChallenge(){
+  if(!confirm('تأكيدي: حتمسحين كل البيانات وتبدأين من اليوم الأول؟'))return;
+  const key=storeKey();
+  await idbDel(key);
+  try{localStorage.removeItem(key);}catch(e){}
+  location.reload();
+}
+
+// ============ FINALE ============
+let chestOpened=false;
+function showFinale(){
+  showScreen('finale');
+  document.getElementById('finaleNameTag').textContent=S.name;
+  confetti(80);setTimeout(()=>confetti(60),700);
+}
+
+function openChest(){
+  if(chestOpened)return;
+  chestOpened=true;
+  const icon=document.getElementById('chestIcon');
+  const tap=document.getElementById('chestTap');
+  const title=document.getElementById('finaleTitle');
+  icon.style.animation='none';
+  icon.textContent='🎊';
+  icon.style.fontSize='70px';
+  icon.style.transform='scale(1.2)';
+  tap.textContent='';
+  title.innerHTML='الكنز<br>اكتشف! 🏆';
+  confetti(120);
+  setTimeout(()=>confetti(80),500);
+  setTimeout(()=>confetti(60),1000);
+
+  // show treasures
+  document.getElementById('treasures').style.display='block';
+  setTimeout(()=>{
+    document.getElementById('t1').classList.add('revealed');
+    buildCard();
+    setTimeout(()=>{
+      document.getElementById('t2').classList.add('revealed');
+      setTimeout(()=>{
+        document.getElementById('t3').classList.add('revealed');
+        // auto open first treasure and start AI
+        toggleTreasure(1);
+        if(!S.aiLetter) generateAILetter();
+        else renderAILetter(S.aiLetter);
+      },400);
+    },300);
+  },200);
+}
+
+function toggleTreasure(n){
+  const body=document.getElementById('tb'+n);
+  const tog=document.getElementById('tog'+n);
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  tog.classList.toggle('open',!isOpen);
+}
+
+// ============ AI LETTER ============
+async function generateAILetter(){
+  const rank=getRank(S.completed);
+  // Pick a random style seed so every girl gets a genuinely different letter
+  const styleSeeds=[
+    {tone:'حنين وشاعري',open:'تخيلي',angle:'الرحلة كقصيدة حياة'},
+    {tone:'قوي ومباشر',open:'اسمعيني',angle:'الإنجاز كدليل على القدرة الداخلية'},
+    {tone:'دافئ كرسالة من أم',open:'حبيبتي',angle:'الفخر والمحبة الصادقة'},
+    {tone:'ملهم كخطاب بطولة',open:'أيتها المستكشفة',angle:'الانتصار الحقيقي على النفس'},
+    {tone:'صادق وعميق',open:'صراحة',angle:'التحول الحقيقي الذي حصل بداخلها'},
+    {tone:'رومانسي مع الحياة',open:'لكِ وحدكِ',angle:'الجمال الخفي في الانضباط'},
+  ];
+  const seed=(S.name.split('').reduce((a,c)=>a+c.charCodeAt(0),0)+S.completed*7+S.sportCount*3)%styleSeeds.length;
+  const style=styleSeeds[seed];
+
+  const prompt=`أنتِ كاتبة رسائل إبداعية عربية متخصصة في تحفيز النساء بأسلوب أدبي راقٍ.
+
+اكتبي رسالة تحفيزية شخصية وعاطفية عميقة باللغة العربية الفصحى المبسطة لفتاة اسمها "${S.name}".
+
+معلوماتها:
+- أكملت ${S.completed} يوماً من تحدي ١٤ يوم
+- قوتها الرياضية: ${sportLvl(S.sportCount)}
+- انضباطها الغذائي: ${mealLvl(S.mealCount)}
+- لقبها: ${rank.t}
+- أكملت رحلة خريطة الكنز كاملة!
+
+أسلوب هذه الرسالة تحديداً: ${style.tone}
+افتتحيها بـ: "${style.open} ${S.name}،"
+الزاوية التي تدور حولها الرسالة: ${style.angle}
+
+متطلبات الرسالة:
+- ٦-٨ أسطر قصيرة، كل سطر فكرة مستقلة ومختلفة عن الأخرى
+- استخدمي اسمها مرة واحدة بشكل طبيعي داخل الرسالة
+- اذكري إنها أكملت رحلة كالمستكشفة الشجاعة
+- الخاتمة جملة قوية لا تُنسى ومرتبطة بالزاوية التي اخترتِها
+- لا تكرري أفكاراً مبتذلة مثل "أنتِ قادرة" فقط، كوني أكثر إبداعاً وعمقاً
+- لا emoji
+
+أعيدي نص الرسالة فقط بدون أي مقدمة.`;
+
+  try{
+    const response=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        messages:[{role:"user",content:prompt}]
+      })
+    });
+    const data=await response.json();
+    if(data.content&&data.content[0]&&data.content[0].text){
+      S.aiLetter=data.content[0].text.trim();save();
+      renderAILetter(S.aiLetter);
+    } else throw new Error('no content');
+  }catch(e){renderLetterError();}
+}
+
+function renderAILetter(text){
+  const body=document.getElementById('aiLetterBody');
+  const lines=text.split('\n').filter(l=>l.trim());
+  let html='<div class="full-letter"><div class="fl-text">';
+  lines.forEach(line=>{
+    const hl=line.replace(new RegExp(S.name,'g'),`<em>${S.name}</em>`);
+    html+=`<p>${hl}</p>`;
+  });
+  html+=`</div><div class="fl-sig"><div class="fl-sig-from">بكل محبة وفخر،</div><div class="fl-sig-name">نيومي 💜</div></div></div>`;
+  body.innerHTML=html;
+  confetti(30);
+}
+
+function renderLetterError(){
+  document.getElementById('aiLetterBody').innerHTML=`<div class="letter-error"><p>تعذّر توليد الرسالة...<br>تأكدي من الاتصال بالإنترنت</p><button class="btn-retry" onclick="generateAILetter()">حاولي مجدداً</button></div>`;
+}
+
+// ============ CARD ============
+const themes={
+  rose:{cls:'theme-rose',em:'🌸',rc:'rgba(241,91,181,0.15)',rt:'#f15bb5'},
+  violet:{cls:'theme-violet',em:'💜',rc:'rgba(155,93,229,0.15)',rt:'#9b5de5'},
+  gold:{cls:'theme-gold',em:'👑',rc:'rgba(245,200,66,0.15)',rt:'#f5c842'},
+  teal:{cls:'theme-teal',em:'💫',rc:'rgba(0,187,249,0.15)',rt:'#00bbf9'},
+};
+const ranks=[
+  {min:0,max:6,t:'🌱 المستكشفة الجريئة',th:'teal'},
+  {min:7,max:9,t:'⚡ المحاربة المثابرة',th:'violet'},
+  {min:10,max:11,t:'💪 البطلة الحقيقية',th:'rose'},
+  {min:12,max:13,t:'🏆 نجمة نيومي',th:'gold'},
+  {min:14,max:14,t:'👑 ملكة الكنز',th:'gold'},
+];
+function getRank(d){return ranks.find(r=>d>=r.min&&d<=r.max)||ranks[0];}
+function sportLvl(n){return n>=12?'أسطورة':n>=9?'قوية جداً':n>=6?'جيدة':'في البداية';}
+function mealLvl(n){return n>=12?'مثالية':n>=9?'منضبطة جداً':n>=6?'واعية':'في البداية';}
+
+function buildCard(){
+  const rank=getRank(S.completed);
+  const th=themes[rank.th];
+  const card=document.getElementById('idCard');
+  card.className='id-card '+th.cls;
+  drawCardPattern(S.name);
+  document.getElementById('cAv').textContent=th.em;
+  document.getElementById('cName').textContent=S.name;
+  const cr=document.getElementById('cRank');
+  cr.textContent=rank.t;cr.style.background=th.rc;cr.style.color=th.rt;
+  cr.style.border=`1px solid ${th.rt}40`;
+  document.getElementById('sDays').textContent=S.completed;
+  document.getElementById('sSport').textContent=sportLvl(S.sportCount);
+  document.getElementById('sMeal').textContent=mealLvl(S.mealCount);
+  document.getElementById('cDate').textContent=new Date().toLocaleDateString('ar-SA');
+  // progress bars
+  const sportPct=Math.min((S.sportCount/14)*100,100);
+  const mealPct=Math.min((S.mealCount/14)*100,100);
+  setTimeout(()=>{
+    const bs=document.getElementById('barSport');
+    const bm=document.getElementById('barMeal');
+    if(bs)bs.style.width=sportPct+'%';
+    if(bm)bm.style.width=mealPct+'%';
+  },300);
+  const bsv=document.getElementById('barSportVal');
+  const bmv=document.getElementById('barMealVal');
+  if(bsv)bsv.textContent=S.sportCount+'/14';
+  if(bmv)bmv.textContent=S.mealCount+'/14';
+  // hologram color matches theme
+  const holo=document.getElementById('cHolo');
+  if(holo)holo.style.color=th.rt;
+}
+
+function drawCardPattern(name){
+  const svg=document.getElementById('cardPat');
+  const seed=name.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const r=n=>((seed*n*9301+49297)%233280)/233280;
+  let s='';
+  for(let i=0;i<12;i++)s+=`<circle cx="${r(i+1)*400}" cy="${r(i+2)*300}" r="${r(i+3)*65+10}" fill="white" opacity="${r(i+4)*0.05+0.01}"/>`;
+  for(let i=0;i<4;i++)s+=`<line x1="${r(i+20)*400}" y1="${r(i+21)*300}" x2="${r(i+22)*400}" y2="${r(i+23)*300}" stroke="white" stroke-width="${r(i)*1.5+0.3}" opacity="0.04"/>`;
+  svg.innerHTML=s;
+}
+
+function shareCard(){
+  const rank=getRank(S.completed);
+  const txt=`🗺️ أكملت تحدي "خريطة الكنز" مع نيومي!\n🎖️ ${rank.t}\n🏆 وصلت للكنز بعد ١٤ يوم!\n\n#نيومي #خريطة_الكنز`;
+  if(navigator.share)navigator.share({text:txt});
+  else navigator.clipboard?.writeText(txt).then(()=>showToast('تم النسخ 📋'));
+}
+function copyCard(){
+  const rank=getRank(S.completed);
+  const txt=`🗺️ ${S.name} أكملت خريطة الكنز!\n🎖️ ${rank.t}\n📅 ${new Date().toLocaleDateString('ar-SA')}\n#نيومي #خريطة_الكنز`;
+  navigator.clipboard?.writeText(txt).then(()=>showToast('تم النسخ ✅'));
+}
+
+function sharePrize(){
+  const txt=`🏆 وصلت للكنز!\n\n"جوائز حقيقية تنتظرك في التحديات القادمة... هل أنتِ مستعدة؟ 🏆"\n\nأكملت ١٤ يوم مع نيومي! 💎\n#نيومي #خريطة_الكنز`;
+  if(navigator.share)navigator.share({text:txt});
+  else navigator.clipboard?.writeText(txt).then(()=>showToast('تم النسخ 📋'));
+}
+
+// ============ CONFETTI ============
+function confetti(n){
+  const c=document.getElementById('cfx');
+  const cols=['#f5c842','#e8a020','#9b5de5','#f15bb5','#00bbf9','#fff'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div');el.className='cfx-p';
+    const sz=Math.random()*8+4;
+    el.style.cssText=`left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation:cfxFall ${Math.random()*1.5+1.2}s linear forwards;animation-delay:${Math.random()*.5}s;`;
+    c.appendChild(el);setTimeout(()=>el.remove(),3000);
+  }
+}
+
+// ============ TOAST ============
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ============ INIT ============
+// no auto-load; user must enter name first
+window.addEventListener('resize',()=>{if(document.getElementById('s-main').classList.contains('active'))initMap();});
+</script>
+</body>
+</html>
